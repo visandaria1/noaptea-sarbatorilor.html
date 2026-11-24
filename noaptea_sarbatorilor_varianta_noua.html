@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<!-- saved from url=(0072)https://sergiupodoreanu.github.io/lectii-media/iarna/spectacol-3in1.html -->
+<html lang="ro"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Noaptea Sărbătorilor – Experiență interactivă</title>
+  <style>
+
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; overflow: hidden; background: #120d18;
+      font-family: Georgia, 'Times New Roman', serif; color: #fff8e9;
+      touch-action: manipulation;
+    }
+    canvas { display: block; }
+    #meniu {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 9px; z-index: 20; flex-wrap: wrap; justify-content: center;
+      background: rgba(28, 16, 27, .91); padding: 11px 14px;
+      border-radius: 5px; border: 1px solid #c79b55;
+      box-shadow: 0 8px 28px rgba(0,0,0,.38);
+      width: max-content; max-width: 96vw;
+    }
+    .btn {
+      background: #342235; color: #fff4dc; border: 1px solid #806044;
+      padding: 10px 15px; border-radius: 3px; cursor: pointer;
+      font-weight: 700; font-size: 12px; letter-spacing: .35px;
+      transition: .22s; font-family: Arial, sans-serif; text-transform: uppercase;
+    }
+    .btn:hover { transform: translateY(-3px); background: #553247; border-color: #f0c878; }
+    .btn.activ {
+      background: #a83d42; border-color: #f2cf8b;
+      box-shadow: 0 0 0 2px rgba(242,207,139,.16), 0 5px 18px rgba(168,61,66,.35);
+    }
+    .btn-mod { background: #82602e; border-color: #e3bd77; }
+    #panouElevi {
+      position: fixed; top: 88px; right: 18px; width: 330px;
+      max-width: calc(100vw - 36px); max-height: calc(100vh - 108px);
+      overflow-y: auto; background: rgba(31, 20, 31, .97);
+      border: 1px solid #c79b55; border-radius: 5px;
+      padding: 19px; z-index: 25; display: none;
+      box-shadow: 0 16px 42px rgba(0,0,0,.62);
+    }
+    #panouElevi h3 {
+      margin: 0 0 17px; font-size: 18px; color: #f0c878;
+      display: flex; justify-content: space-between; align-items: center;
+      letter-spacing: .5px;
+    }
+    .camp { margin-bottom: 13px; }
+    .camp label {
+      display: block; font: 11px Arial, sans-serif; color: #e5cba3;
+      margin-bottom: 6px; letter-spacing: .55px; text-transform: uppercase;
+    }
+    .camp input[type="text"] {
+      width: 100%; padding: 10px 11px; border-radius: 3px;
+      border: 1px solid #72556a; background: #211724;
+      color: #fff8e9; font-size: 13px; user-select: text;
+      -webkit-user-select: text; font-family: Arial, sans-serif;
+    }
+    .camp input[type="text"]:focus { outline: 1px solid #e5bd73; border-color: #e5bd73; }
+    .camp input[type="range"] { width: 100%; accent-color: #d69c4d; cursor: pointer; }
+    .val-badge { float: right; color: #f0c878; font-weight: bold; }
+    .panou-actiuni { display: flex; gap: 8px; margin-top: 16px; }
+    .panou-actiuni button {
+      flex: 1; padding: 10px; border-radius: 3px; border: 1px solid #9e7447;
+      font-weight: bold; cursor: pointer; font-size: 11px;
+      font-family: Arial, sans-serif; text-transform: uppercase;
+    }
+    .btn-aplica { background: #a83d42; color: #fff8e9; }
+    .btn-reset { background: #38293a; color: #fff8e9; }
+    .btn-inchide {
+      background: none; border: 0; color: #f0c878;
+      font-size: 18px; cursor: pointer; padding: 0 4px;
+    }
+    #startOverlay {
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at center, #563047 0%, #211526 55%, #100b14 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 30; text-align: center; padding: 24px;
+    }
+    #startOverlay:before {
+      content: "✦  ✧  ✦"; color: #e6bd76; font-size: 24px;
+      letter-spacing: 18px; margin-bottom: 22px;
+    }
+    #startOverlay h1 {
+      font: bold clamp(30px, 6vw, 58px) Georgia, serif; max-width: 900px;
+      margin: 0 0 14px; color: #fff0d0; text-shadow: 0 4px 0 #7c343c, 0 0 28px rgba(240,200,120,.35);
+    }
+    #startOverlay p {
+      font: 14px/1.6 Arial, sans-serif; letter-spacing: 1.2px;
+      color: #e8cda7; margin: 0 0 30px; text-transform: uppercase;
+    }
+    .btn-mare {
+      font: bold 14px Arial, sans-serif; letter-spacing: 1.4px;
+      padding: 17px 30px; border-radius: 3px; border: 1px solid #f4d38f;
+      background: #a83d42; color: #fff8e9; cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0,0,0,.35); transition: .2s;
+    }
+    .btn-mare:hover { transform: translateY(-3px); background: #c34e4c; }
+    #hint {
+      position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+      font: 11px Arial, sans-serif; letter-spacing: .7px;
+      color: #fff1d8; pointer-events: none; z-index: 15;
+      text-align: center; width: 92vw; text-shadow: 0 2px 5px #000;
+      text-transform: uppercase;
+    }
+    @media (max-width: 650px) {
+      #meniu { top: 8px; gap: 5px; padding: 7px; }
+      .btn { font-size: 10px; padding: 8px 9px; }
+      #panouElevi { top: 105px; right: 8px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="startOverlay" style="display: none;">
+  <h1>Magia unei seri de sărbătoare</h1>
+  <p>Trei momente speciale. O singură seară de poveste.</p>
+  <button class="btn-mare" onclick="pornesteAplicatia(1)">INTRĂ ÎN ATMOSFERĂ</button>
+</div>
+
+<div id="meniu" style="display: flex;">
+  <button class="btn activ" id="b1" onclick="schimbaScena(1)">01 · O vizită neașteptată</button>
+  <button class="btn" id="b2" onclick="schimbaScena(2)">02 · Cursa prin zăpadă</button>
+  <button class="btn" id="b3" onclick="schimbaScena(3)">03 · Cerul în sărbătoare</button>
+  <button class="btn btn-mod" onclick="togglePanou()">✦ Personalizare</button>
+</div>
+
+<div id="panouElevi" style="display: block;">
+  <h3>
+    <span>✦ Personalizare</span>
+    <button class="btn-inchide" onclick="togglePanou()" title="Închide">✖</button>
+  </h3>
+  <div class="camp"><label>Momentul 1 – Întrebarea serii:</label><input type="text" id="inIntrebare"></div>
+  <div class="camp"><label>Momentul 1 – Mesajul-surpriză:</label><input type="text" id="inSac"></div>
+  <div class="camp"><label>Momentul 2 – Titlul cursei:</label><input type="text" id="inTitluNitro"></div>
+  <div class="camp"><label>Momentul 2 – Text secundar:</label><input type="text" id="inSubNitro"></div>
+  <div class="camp"><label>Momentul 3 – Urări pentru noul an:</label><input type="text" id="inRevelion"></div>
+  <hr style="border:0; border-top:1px solid rgba(255,255,255,0.15); margin: 12px 0;">
+  <div class="camp">
+    <label>Ritm efecte: <span class="val-badge" id="valViteza">1.0x</span></label>
+    <input type="range" id="inViteza" min="0.5" max="2.0" step="0.1" oninput="actualizeazaLive()">
+  </div>
+  <div class="camp">
+    <label>Cantitate fulgi: <span class="val-badge" id="valFulgi">220</span></label>
+    <input type="range" id="inFulgi" min="20" max="600" step="10" oninput="actualizeazaLive()">
+  </div>
+  <div class="camp">
+    <label>Nivel audio: <span class="val-badge" id="valVolum">75%</span></label>
+    <input type="range" id="inVolum" min="0" max="100" step="5" oninput="actualizeazaLive()">
+  </div>
+  <div class="panou-actiuni">
+    <button class="btn-aplica" onclick="aplicaSiReporneste()">Salvează modificările</button>
+    <button class="btn-reset" onclick="reseteazaSetari()">Revino la inițial</button>
+  </div>
+</div>
+
+<div id="hint">Apasă din nou pe butonul 1 pentru a reporni sau ✦ Personalizare pentru personalizare.</div>
+<canvas id="c" width="1920" height="945"></canvas>
+
+<script>
+/* =====================================================================
+   ZONA DE PERSONALIZARE – se poate schimba și direct de pe ecran („Setări”)
+   ===================================================================== */
+const DEFAULT_CONFIG = {
+  intrebareMos: "EȘTI GATA DE O SURPRIZĂ?",
+  mesajSac: "SURPRIZA TA A SOSIT!",
+  titluNitro: "SANIA A INTRAT ÎN VITEZĂ!",
+  subtitluNitro: "SĂ FIE O IARNĂ MINUNATĂ!",
+  mesajRevelion: "UN AN NOU, O POVESTE NOUĂ!",
+  subtitluRevelion: "Atinge cerul pentru a aprinde luminile. Două apăsări rapide declanșează un efect amplu.",
+  viteza: 1.0,
+  numarFulgi: 220,
+  volumGeneral: 0.75
+};
+let CONFIG = { ...DEFAULT_CONFIG };
+
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+const hintEl = document.getElementById("hint");
+let W, H, U;                                   // U = unitate de mărime (1 la un ecran de 720 px înălțime)
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  U = Math.min(W / 1000, H / 720);
+  for (const f of fulgi) { f.x = Math.random() * W; f.y = Math.random() * H; }
+}
+window.addEventListener("resize", resize);
+
+/* ---------------------------- Setări ---------------------------- */
+const el = id => document.getElementById(id);
+function populeazaPanou() {
+  el("inIntrebare").value = CONFIG.intrebareMos;
+  el("inSac").value = CONFIG.mesajSac;
+  el("inTitluNitro").value = CONFIG.titluNitro;
+  el("inSubNitro").value = CONFIG.subtitluNitro;
+  el("inRevelion").value = CONFIG.mesajRevelion;
+  el("inViteza").value = CONFIG.viteza;
+  el("inFulgi").value = CONFIG.numarFulgi;
+  el("inVolum").value = Math.round(CONFIG.volumGeneral * 100);
+  actualizeazaEtichete();
+}
+function actualizeazaEtichete() {
+  el("valViteza").textContent = parseFloat(el("inViteza").value).toFixed(1) + "x";
+  el("valFulgi").textContent = el("inFulgi").value;
+  el("valVolum").textContent = el("inVolum").value + "%";
+}
+function actualizeazaLive() {
+  actualizeazaEtichete();
+  CONFIG.viteza = parseFloat(el("inViteza").value);
+  CONFIG.numarFulgi = parseInt(el("inFulgi").value, 10);
+  CONFIG.volumGeneral = parseInt(el("inVolum").value, 10) / 100;
+  if (masterGain) masterGain.gain.value = CONFIG.volumGeneral;
+  sincronizeazaFulgi();
+}
+function aplicaSiReporneste() {
+  CONFIG.intrebareMos = el("inIntrebare").value.trim() || DEFAULT_CONFIG.intrebareMos;
+  CONFIG.mesajSac = el("inSac").value.trim() || DEFAULT_CONFIG.mesajSac;
+  CONFIG.titluNitro = el("inTitluNitro").value.trim() || DEFAULT_CONFIG.titluNitro;
+  CONFIG.subtitluNitro = el("inSubNitro").value.trim() || DEFAULT_CONFIG.subtitluNitro;
+  CONFIG.mesajRevelion = el("inRevelion").value.trim() || DEFAULT_CONFIG.mesajRevelion;
+  actualizeazaLive();
+  el("panouElevi").style.display = "none";
+  if (scenaCurenta > 0) schimbaScena(scenaCurenta);
+}
+function reseteazaSetari() {
+  CONFIG = { ...DEFAULT_CONFIG };
+  populeazaPanou();
+  actualizeazaLive();
+  if (scenaCurenta > 0) schimbaScena(scenaCurenta);
+}
+function togglePanou() {
+  const p = el("panouElevi");
+  const deschis = p.style.display === "block";
+  if (!deschis) populeazaPanou();
+  p.style.display = deschis ? "none" : "block";
+}
+
+/* =====================================================================
+   SUNETUL – totul este sintetizat cu Web Audio, fără fișiere
+   ===================================================================== */
+let audioCtx = null, masterGain = null, bufZgomot = null;
+let activeNodes = [], activeTimers = [];
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = CONFIG.volumGeneral;
+    masterGain.connect(audioCtx.destination);
+    bufZgomot = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);   // 2 s de zgomot alb, refolosit
+    const d = bufZgomot.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  if (audioCtx.state === "suspended") audioCtx.resume();
+}
+function tineMinte(nod) {                       // ca să-l putem opri la schimbarea scenei
+  activeNodes.push(nod);
+  nod.onended = () => { const i = activeNodes.indexOf(nod); if (i >= 0) activeNodes.splice(i, 1); };
+}
+function stopToateSunetele() {
+  activeTimers.forEach(t => clearTimeout(t));
+  activeTimers = [];
+  activeNodes.forEach(n => { n.onended = null; try { n.stop(); } catch (e) {} try { n.disconnect(); } catch (e) {} });
+  activeNodes = [];
+}
+function planifica(fn, ms) { activeTimers.push(setTimeout(fn, ms)); }
+
+function sunetTon(tip, fStart, fEnd, dur, vol, delay = 0) {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime + delay;
+  const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+  osc.type = tip;
+  osc.frequency.setValueAtTime(fStart, now);
+  if (fEnd !== fStart) osc.frequency.exponentialRampToValueAtTime(Math.max(20, fEnd), now + dur);
+  g.gain.setValueAtTime(0.001, now);
+  g.gain.linearRampToValueAtTime(vol, now + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+  osc.connect(g); g.connect(masterGain);
+  osc.start(now); osc.stop(now + dur + 0.05);
+  tineMinte(osc);
+}
+/* zgomot filtrat: tipFiltru = "lowpass" / "bandpass" / "highpass"; volumele = [[timp, volum], ...] */
+function sunetZgomot(durata, tipFiltru, frecventa, volume, delay = 0, bucla = false) {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime + delay;
+  const src = audioCtx.createBufferSource();
+  src.buffer = bufZgomot; src.loop = bucla || durata > 1.9;
+  const f = audioCtx.createBiquadFilter(); f.type = tipFiltru; f.frequency.value = frecventa;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(volume[0][1], now);
+  for (const [t, v] of volume.slice(1)) g.gain.linearRampToValueAtTime(Math.max(0.0001, v), now + t);
+  src.connect(f); f.connect(g); g.connect(masterGain);
+  src.start(now, Math.random()); src.stop(now + durata);
+  tineMinte(src);
+}
+
+/* =====================================================================
+   ELEMENTE COMUNE: cer, stele, lună, brazi, zăpadă, particule, efecte
+   ===================================================================== */
+const stele = Array.from({ length: 260 }, () => ({ x: Math.random(), y: Math.random() * 0.7, r: Math.random() * 1.3 + 0.3, f: Math.random() * 6.28 }));
+const brazi = Array.from({ length: 34 }, (_, i) => ({ x: i / 33 + (Math.random() - 0.5) * 0.02, h: 0.12 + Math.random() * 0.16, strat: i % 2 }));
+
+function deseneazaCer(culSus, culJos, timp, cuLuna = true) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, culSus); g.addColorStop(1, culJos);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  for (const s of stele) {
+    ctx.globalAlpha = 0.45 + 0.55 * Math.sin(timp * 2 + s.f);                // stelele sclipesc
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(s.x * W, s.y * H, s.r * 1.4, s.r * 1.4);
+  }
+  ctx.globalAlpha = 1;
+  if (cuLuna) {
+    const lx = W * 0.84, ly = H * 0.2, lr = 46 * U;
+    const halo = ctx.createRadialGradient(lx, ly, lr * 0.6, lx, ly, lr * 4);
+    halo.addColorStop(0, "rgba(200,225,255,.35)"); halo.addColorStop(1, "rgba(200,225,255,0)");
+    ctx.fillStyle = halo; ctx.fillRect(lx - lr * 4, ly - lr * 4, lr * 8, lr * 8);
+    ctx.fillStyle = "#f4f1dc"; ctx.beginPath(); ctx.arc(lx, ly, lr, 0, 6.3); ctx.fill();
+    ctx.fillStyle = "rgba(180,180,160,.35)";
+    ctx.beginPath(); ctx.arc(lx - lr * 0.3, ly - lr * 0.2, lr * 0.18, 0, 6.3); ctx.arc(lx + lr * 0.25, ly + lr * 0.3, lr * 0.25, 0, 6.3); ctx.fill();
+  }
+}
+function deseneazaAurora(timp, tarie = 1) {
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  for (let b = 0; b < 3; b++) {
+    const g = ctx.createLinearGradient(0, H * 0.05, 0, H * 0.55);
+    const cul = ["0,255,170", "0,180,255", "190,90,255"][b];
+    g.addColorStop(0, `rgba(${cul},0)`); g.addColorStop(0.5, `rgba(${cul},${0.16 * tarie})`); g.addColorStop(1, `rgba(${cul},0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(0, H * 0.6);
+    for (let x = 0; x <= W; x += 30) ctx.lineTo(x, H * (0.14 + b * 0.05) + Math.sin(x * 0.006 + timp * (0.5 + b * 0.2) + b * 2) * H * 0.07);
+    ctx.lineTo(W, H * 0.6); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+}
+function deseneazaPadure(ySol, culSpate, culFata, leganare = 0) {
+  for (let strat = 0; strat < 2; strat++) {
+    ctx.fillStyle = strat ? culFata : culSpate;
+    for (const b of brazi) {
+      if (b.strat !== strat) continue;
+      const hb = b.h * H * (strat ? 1.15 : 0.8), bx = b.x * W, by = ySol + (strat ? 12 * U : 0);
+      const inc = Math.sin(leganare + b.x * 20) * hb * 0.03;
+      for (let e = 0; e < 3; e++) {                                           // trei etaje de crengi
+        const yb = by - hb * e * 0.28, lat = hb * (0.34 - e * 0.08);
+        ctx.beginPath(); ctx.moveTo(bx + inc * (e + 1), yb - hb * 0.5); ctx.lineTo(bx - lat, yb); ctx.lineTo(bx + lat, yb); ctx.fill();
+      }
+    }
+  }
+}
+function deseneazaSol(ySol, culSus, culJos) {
+  const g = ctx.createLinearGradient(0, ySol, 0, H);
+  g.addColorStop(0, culSus); g.addColorStop(1, culJos);
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.moveTo(0, H); ctx.lineTo(0, ySol);
+  for (let x = 0; x <= W; x += 40) ctx.lineTo(x, ySol + Math.sin(x * 0.008) * 6 * U);    // troiene line
+  ctx.lineTo(W, ySol); ctx.lineTo(W, H); ctx.fill();
+}
+
+/* zăpada: fulgii mari sunt „aproape” (cad repede), cei mici sunt „departe” (cad încet) */
+let fulgi = [];
+function sincronizeazaFulgi() {
+  while (fulgi.length < CONFIG.numarFulgi) {
+    const ad = Math.random();
+    fulgi.push({ x: Math.random() * (W || 1000), y: Math.random() * (H || 700), ad, r: 0.8 + ad * 2.6, f: Math.random() * 6.28 });
+  }
+  if (fulgi.length > CONFIG.numarFulgi) fulgi.length = CONFIG.numarFulgi;
+}
+function deseneazaZapada(dt, timp, vant = 0, vitezaExtra = 1) {
+  ctx.fillStyle = "#fff";
+  for (const f of fulgi) {
+    f.y += (40 + f.ad * 110) * vitezaExtra * dt;
+    f.x += (Math.sin(timp * 1.3 + f.f) * 18 + vant * (0.4 + f.ad)) * dt;
+    if (f.y > H + 5) { f.y = -5; f.x = Math.random() * W; }
+    if (f.x > W + 5) f.x = -5; else if (f.x < -5) f.x = W + 5;
+    ctx.globalAlpha = 0.35 + f.ad * 0.6;
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.r * U + 0.4, 0, 6.3); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* particule: scântei, flăcări, confetti – toate în aceeași listă */
+let particule = [];
+function particula(x, y, vx, vy, viata, culoare, raza, grav = 0, tip = 0) {
+  if (particule.length < 3500) particule.push({ x, y, px: x, py: y, vx, vy, viata, durata: viata, culoare, raza, grav, tip, rot: Math.random() * 6 });
+}
+function deseneazaParticule(dt) {
+  for (let i = particule.length - 1; i >= 0; i--) {
+    const p = particule[i];
+    p.viata -= dt;
+    if (p.viata <= 0) { particule.splice(i, 1); continue; }
+    p.px = p.x; p.py = p.y;
+    p.vy += p.grav * dt;
+    const fr = Math.pow(p.tip === 2 ? 0.5 : 0.25, dt);                        // frânare în aer
+    p.vx *= fr; p.vy *= p.tip === 2 ? 1 : fr;
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    const k = p.viata / p.durata;
+    if (p.tip === 2) {                                                        // confetti: pătrățele care se răsucesc
+      ctx.globalCompositeOperation = "source-over";
+      ctx.globalAlpha = Math.min(1, k * 3);
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot + p.viata * 6); ctx.scale(1, Math.cos(p.viata * 9));
+      ctx.fillStyle = p.culoare; ctx.fillRect(-p.raza, -p.raza * 0.6, p.raza * 2, p.raza * 1.2); ctx.restore();
+    } else {                                                                  // scântei: liniuță luminoasă (dâră)
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = p.tip === 1 ? k * (0.5 + Math.random() * 0.5) : k;    // tip 1 = pâlpâie
+      ctx.strokeStyle = p.culoare; ctx.lineCap = "round";
+      ctx.beginPath(); ctx.moveTo(p.px - p.vx * 0.03, p.py - p.vy * 0.03); ctx.lineTo(p.x, p.y);
+      ctx.lineWidth = p.raza * (0.8 + k * 1.2); ctx.stroke();
+      ctx.globalAlpha *= 0.3; ctx.lineWidth = p.raza * 4; ctx.stroke();        // halou în jurul scânteii
+    }
+  }
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+}
+function confetti(x, y, n, putere = 1) {
+  const cul = ["#ff2a54", "#00d4ff", "#ffd700", "#00ff88", "#d633ff", "#ffffff"];
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI / 2 + (Math.random() - 0.5) * 1.6, v = (300 + Math.random() * 500) * U * putere;
+    particula(x, y, Math.cos(a) * v, Math.sin(a) * v, 2.5 + Math.random() * 1.5, cul[i % 6], (4 + Math.random() * 4) * U, 380 * U, 2);
+  }
+}
+
+let zguduire = 0, strafulgerare = 0, culStrafulgerare = "255,255,255";
+function efecteEcran(dt) {
+  zguduire = Math.max(0, zguduire - dt * 2.5);
+  if (strafulgerare > 0) {
+    ctx.fillStyle = `rgba(${culStrafulgerare},${Math.min(1, strafulgerare)})`;
+    ctx.fillRect(0, 0, W, H);
+    strafulgerare = Math.max(0, strafulgerare - dt * 3);
+  }
+}
+function text(mesaj, x, y, marime, culoare, umbra, scara = 1) {
+  ctx.save();
+  ctx.translate(x, y); ctx.scale(scara, scara);
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  let m = marime;
+  ctx.font = `bold ${m}px 'Segoe UI', sans-serif`;
+  const lat = ctx.measureText(mesaj).width;
+  if (lat > W * 0.92) { m *= W * 0.92 / lat; ctx.font = `bold ${m}px 'Segoe UI', sans-serif`; }   // textul lung se micșorează singur
+  ctx.shadowColor = umbra; ctx.shadowBlur = m * 0.45;
+  ctx.lineWidth = m * 0.08; ctx.strokeStyle = "rgba(0,0,0,.55)"; ctx.strokeText(mesaj, 0, 0);
+  ctx.fillStyle = culoare; ctx.fillText(mesaj, 0, 0); ctx.fillText(mesaj, 0, 0);
+  ctx.restore();
+}
+const lin = (a, b, t) => a + (b - a) * Math.max(0, Math.min(1, t));
+const aparitie = t => t <= 0 ? 0 : t >= 1 ? 1 : 1 + 2.7 * Math.pow(t - 1, 3) + 1.7 * Math.pow(t - 1, 2);   // „săritură” la apariție
+
+/* =====================================================================
+   SCENA 1 – MOȘUL TE PRINDE ÎN SAC
+   ===================================================================== */
+let tScena = 0, fulgerPuncte = [], s1Stare = {};
+function startScena1() {
+  tScena = 0; particule = []; s1Stare = { fulger1: false, fulger2: false, sac: false };
+  const v = CONFIG.viteza;
+  hintEl.textContent = "Apasă din nou pe butonul 1 pentru a reporni sau ✦ Personalizare pentru personalizare.";
+
+  sunetZgomot(9 / v, "lowpass", 380, [[0, 0.3], [6 / v, 0.45], [9 / v, 0.2]]);                 // viscolul
+  sunetTon("sine", 42, 40, 6.5 / v, 0.35, 0);                                                   // zumzet grav
+  sunetTon("sine", 44.5, 43, 6.5 / v, 0.28, 0);
+  [[0.3, 659], [0.8, 622], [1.3, 659], [1.8, 523], [2.3, 493]].forEach(([t, f]) => sunetTon("triangle", f, f * 0.98, 0.7 / v, 0.22, t / v));
+  [1.0, 1.8, 2.5, 3.0].forEach(t => sunetTon("sine", 75, 30, 0.22, 0.6, t / v));                // pașii
+  sunetTon("sawtooth", 55, 48, 1.3 / v, 0.45, 3.2 / v);                                         // tunetul
+  sunetTon("square", 110, 95, 1.1 / v, 0.2, 3.2 / v);
+  sunetZgomot(1.6, "lowpass", 900, [[0, 0.9], [1.6, 0.001]], 3.2 / v);
+  sunetTon("sawtooth", 180, 1400, 1.75 / v, 0.35, 4.5 / v);                                     // urcarea
+  [4.6, 5.0, 5.35, 5.65, 5.9, 6.1].forEach(t => sunetTon("sine", 95, 28, 0.16, 0.7, t / v));
+  sunetTon("sine", 130, 22, 1.0, 0.9, 6.3 / v);                                                 // bufnitura
+  sunetZgomot(1.1, "lowpass", 2500, [[0, 0.8], [1.1, 0.001]], 6.3 / v);
+  [0, 0.25, 0.5].forEach((d, i) => sunetTon("sawtooth", 150 - i * 15, 90 - i * 10, 0.2, 0.4, 7.0 / v + d));   // „ho-ho-ho”
+}
+function creeazaFulger() {
+  fulgerPuncte = [];
+  let x = W * (0.25 + Math.random() * 0.5), y = 0;
+  while (y < H * 0.62) { fulgerPuncte.push([x, y]); x += (Math.random() - 0.5) * 120 * U; y += (20 + Math.random() * 40) * U; }
+}
+function drawMos(x, y, scara, ochiRosii, brate, timp) {
+  ctx.save();
+  ctx.translate(x, y); ctx.scale(scara, scara);
+  ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.beginPath(); ctx.ellipse(0, 84, 80, 12, 0, 0, 6.3); ctx.fill();   // umbra
+  ctx.fillStyle = "#5c3317"; ctx.beginPath(); ctx.ellipse(72, -14, 40, 54, 0.2, 0, 6.3); ctx.fill();       // sacul
+  ctx.strokeStyle = "#3a1d0b"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(52, -58); ctx.lineTo(92, -62); ctx.stroke();
+  // brațele (se ridică la atac)
+  ctx.strokeStyle = "#a50f1a"; ctx.lineWidth = 20; ctx.lineCap = "round";
+  for (const s of [-1, 1]) {
+    const un = lin(0.5, -0.9, brate) + Math.sin(timp * 12) * 0.08 * brate;
+    const bx = s * 38, by = -52, ex = bx + s * Math.cos(un) * 55, ey = by + Math.sin(un) * 55;
+    ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(ex, ey, 13, 0, 6.3); ctx.fill();
+  }
+  ctx.fillStyle = "#111"; ctx.fillRect(-48, 68, 38, 16); ctx.fillRect(10, 68, 38, 16);                     // cizmele
+  const gc = ctx.createLinearGradient(-65, 0, 65, 0);
+  gc.addColorStop(0, "#8f0d16"); gc.addColorStop(0.5, "#d91624"); gc.addColorStop(1, "#8f0d16");
+  ctx.fillStyle = gc; ctx.beginPath(); ctx.moveTo(0, -84); ctx.lineTo(-66, 76); ctx.lineTo(66, 76); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.fillRect(-68, 64, 136, 14); ctx.fillRect(-7, -60, 14, 126);                  // blana
+  ctx.fillStyle = "#111"; ctx.fillRect(-47, 8, 94, 18);
+  ctx.fillStyle = "#ffd700"; ctx.fillRect(-14, 5, 28, 24); ctx.fillStyle = "#111"; ctx.fillRect(-7, 11, 14, 12);
+  ctx.fillStyle = "#ffcdb2"; ctx.beginPath(); ctx.arc(0, -95, 34, 0, 6.3); ctx.fill();                     // fața
+  ctx.fillStyle = "#fff";                                                                                    // barba
+  ctx.beginPath(); ctx.moveTo(-34, -92); ctx.quadraticCurveTo(-36, -30, 0, -18); ctx.quadraticCurveTo(36, -30, 34, -92); ctx.quadraticCurveTo(0, -70, -34, -92); ctx.fill();
+  ctx.fillStyle = "#c1121f"; ctx.beginPath(); ctx.moveTo(-36, -115); ctx.quadraticCurveTo(0, -190, 40, -150); ctx.lineTo(36, -115); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.fillRect(-39, -124, 78, 15);
+  ctx.beginPath(); ctx.arc(42, -148, 11, 0, 6.3); ctx.fill();
+  if (ochiRosii) {                                                                                           // ochii aprinși
+    ctx.globalCompositeOperation = "lighter";
+    for (const s of [-12, 12]) {
+      const g = ctx.createRadialGradient(s, -102, 0, s, -102, 26);
+      g.addColorStop(0, "rgba(255,60,40,.95)"); g.addColorStop(1, "rgba(255,0,0,0)");
+      ctx.fillStyle = g; ctx.fillRect(s - 26, -128, 52, 52);
+    }
+    ctx.globalCompositeOperation = "source-over";
+    ctx.strokeStyle = "#400"; ctx.lineWidth = 4;                                                            // sprâncene încruntate
+    ctx.beginPath(); ctx.moveTo(-22, -116); ctx.lineTo(-5, -109); ctx.moveTo(22, -116); ctx.lineTo(5, -109); ctx.stroke();
+  }
+  ctx.fillStyle = ochiRosii ? "#ff2a1a" : "#111";
+  ctx.beginPath(); ctx.arc(-12, -102, 5.5, 0, 6.3); ctx.arc(12, -102, 5.5, 0, 6.3); ctx.fill();
+  ctx.fillStyle = "#e07a5f"; ctx.beginPath(); ctx.arc(0, -92, 6, 0, 6.3); ctx.fill();
+  ctx.strokeStyle = "#7a0000"; ctx.lineWidth = 4; ctx.beginPath();
+  if (ochiRosii) ctx.arc(0, -70, 12, 1.15 * Math.PI, 1.85 * Math.PI); else ctx.arc(0, -86, 14, 0.15 * Math.PI, 0.85 * Math.PI);
+  ctx.stroke();
+  ctx.restore();
+}
+function renderScena1(dt, timp) {
+  const t = tScena;
+  if (t > 3.18 && !s1Stare.fulger1) { s1Stare.fulger1 = true; creeazaFulger(); strafulgerare = 0.9; zguduire = 0.4; }
+  if (t > 3.45 && !s1Stare.fulger2) { s1Stare.fulger2 = true; creeazaFulger(); strafulgerare = 0.7; }
+  if (t > 6.3 && !s1Stare.sac) { s1Stare.sac = true; zguduire = 1; }
+  const fulger = (t > 3.18 && t < 3.35) || (t > 3.45 && t < 3.55);
+  const ySol = H * 0.66;
+
+  ctx.save();
+  const zg = zguduire * 14 * U;
+  ctx.translate((Math.random() - 0.5) * zg, (Math.random() - 0.5) * zg);
+  deseneazaCer(fulger ? "#5d7fa8" : "#02040d", fulger ? "#a9c6e6" : "#0c1730", timp);
+  deseneazaPadure(ySol, fulger ? "#20324a" : "#050a14", fulger ? "#0d1a2b" : "#02050b", timp * 1.5);
+  deseneazaSol(ySol, fulger ? "#e8f3ff" : "#1b2a4a", fulger ? "#bcd3ee" : "#0a1226");
+  if (fulger && fulgerPuncte.length) {                                           // fulgerul desenat ca linie frântă
+    ctx.strokeStyle = "#fff"; ctx.shadowColor = "#9cf"; ctx.shadowBlur = 30; ctx.lineWidth = 5 * U; ctx.lineJoin = "round";
+    ctx.beginPath(); fulgerPuncte.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+  for (let b = 0; b < 3; b++) {                                                   // ceață care curge pe jos
+    const g = ctx.createLinearGradient(0, ySol - 60 * U, 0, ySol + 60 * U);
+    g.addColorStop(0, "rgba(150,170,210,0)"); g.addColorStop(0.5, "rgba(150,170,210,.10)"); g.addColorStop(1, "rgba(150,170,210,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(((timp * 30 * (b + 1)) % W) - W, ySol - 60 * U + b * 25 * U, W * 2, 120 * U);
+  }
+
+  let scara = 0.25, salt = 0, tremurX = 0, tremurY = 0, brate = 0;
+  if (t < 3.2) { const p = t / 3.2; scara = 0.25 + p * 0.95; salt = Math.abs(Math.sin(t * 6)) * 18; }
+  else if (t < 4.5) { scara = 1.2; brate = lin(0, 1, (t - 3.2) / 0.3); }
+  else if (t < 6.3) {
+    const p = (t - 4.5) / 1.8;
+    scara = 1.2 + p * p * 3.8; salt = Math.abs(Math.sin(t * 14)) * 35; brate = 1;
+    tremurX = (Math.random() - 0.5) * 24 * p; tremurY = (Math.random() - 0.5) * 24 * p;
+  } else { scara = 5.0; brate = 1; }
+  scara *= U * 1.15;
+  // în timpul atacului fața Moșului rămâne în mijlocul ecranului (nu iese din cadru)
+  const yMos = lin(ySol + 10 * U, H * 0.52 + 95 * scara, t < 4.5 ? 0 : (t - 4.5) / 1.8);
+  drawMos(W / 2 + tremurX, yMos - salt * U + tremurY, scara, t > 3.15, brate, timp);
+  deseneazaZapada(dt, timp, 160 + t * 40, 1.5);                                   // viscolul se întețește
+
+  const vig = ctx.createRadialGradient(W / 2, H / 2, H * 0.25, W / 2, H / 2, Math.max(W, H) * 0.75);   // margini întunecate
+  vig.addColorStop(0, "rgba(0,0,0,0)");
+  vig.addColorStop(1, t > 4.5 ? `rgba(${Math.round(120 * (0.5 + 0.5 * Math.sin(t * 16)))},0,0,.8)` : "rgba(0,0,0,.75)");
+  ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
+
+  if (t >= 3.2 && t < 4.6)
+    text(CONFIG.intrebareMos, W / 2 + (Math.random() - 0.5) * 4, H * 0.24, 64 * U, "#ff3b2e", "#ff0000", aparitie((t - 3.2) / 0.3));
+  ctx.restore();
+
+  if (t >= 6.25) {                                                                // sacul se închide peste ecran
+    const pSac = Math.min(1, (t - 6.25) / 0.25);
+    const raza = Math.hypot(W, H) * 0.6;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.arc(W / 2, H / 2, raza * (1 - pSac) + 0.01, 0, 6.3, true); ctx.clip("evenodd");
+    const g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, raza);
+    g.addColorStop(0, "#5a3215"); g.addColorStop(1, "#1d0f05");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = "rgba(0,0,0,.18)"; ctx.lineWidth = 2;                       // țesătura de sac
+    for (let i = -H; i < W; i += 14) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.moveTo(i + H, 0); ctx.lineTo(i, H); ctx.stroke(); }
+    ctx.restore();
+    if (pSac >= 1) {
+      const k = t - 6.5;
+      text(CONFIG.mesajSac, W / 2, H * 0.46, 76 * U, "#ff4a1c", "#ff0000", aparitie(k / 0.35) * (1 + 0.04 * Math.sin(t * 9)));
+      if (k > 0.5) text("HO! HO! HO!", W / 2, H * 0.62, 40 * U, "#ffd700", "#ff8c00", aparitie((k - 0.5) / 0.3));
+      if (k > 0.5 && !s1Stare.conf) { s1Stare.conf = true; confetti(W * 0.2, H, 90, 1.5); confetti(W * 0.8, H, 90, 1.5); }
+    }
+  }
+  deseneazaParticule(dt);
+  efecteEcran(dt);
+}
+
+/* =====================================================================
+   SCENA 2 – MOȘUL TURBO NITRO
+   ===================================================================== */
+let cadouri = [], s2Stare = {};
+const T_DISCO = 4.5, PAS_BATAIE = 0.454;
+function startScena2() {
+  tScena = 0; cadouri = []; particule = []; s2Stare = { bataie: -1, unda: -1, boing: false, cadouriDate: 0 };
+  const v = CONFIG.viteza;
+  hintEl.textContent = "Apasă din nou pe butonul 2 pentru a reporni sau ✦ Personalizare pentru personalizare.";
+  sunetZgomot(5.5 / v, "bandpass", 500, [[0, 0.05], [2.5 / v, 0.45], [5.2 / v, 0.01]]);        // reactoarele
+  sunetTon("sawtooth", 70, 160, 2.6 / v, 0.18, 0);
+  sunetTon("sawtooth", 160, 60, 2.6 / v, 0.18, 2.6 / v);
+}
+function deseneazaSanie(x, y, scara, unghi, timp) {
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(unghi); ctx.scale(scara, scara);
+  ctx.globalCompositeOperation = "lighter";                                       // flăcările de nitro
+  for (const [cul, lung, gros] of [["#00d4ff", 1, 18], ["#ffffff", 0.55, 9], ["#ff6600", 0.4, 13]]) {
+    const fl = (70 + Math.random() * 60) * lung;
+    const g = ctx.createLinearGradient(-65, 0, -65 - fl, 0);
+    g.addColorStop(0, cul); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.moveTo(-62, -gros * 0.5 + 6); ctx.lineTo(-65 - fl, 6); ctx.lineTo(-62, gros * 0.5 + 6); ctx.fill();
+  }
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = "#666"; ctx.fillRect(-82, -6, 30, 24);                          // reactorul
+  ctx.fillStyle = "#999"; ctx.fillRect(-88, -3, 8, 18);
+  ctx.strokeStyle = "#ffd700"; ctx.lineWidth = 6; ctx.lineCap = "round";          // tălpile
+  ctx.beginPath(); ctx.moveTo(-70, 26); ctx.lineTo(70, 26); ctx.quadraticCurveTo(96, 24, 92, 2); ctx.stroke();
+  ctx.fillStyle = "#d90429";                                                       // corpul saniei
+  ctx.beginPath(); ctx.moveTo(-62, 16); ctx.lineTo(-62, -22); ctx.quadraticCurveTo(-30, -30, -20, -8); ctx.lineTo(40, -8); ctx.quadraticCurveTo(70, -34, 78, -6); ctx.lineTo(70, 16); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#ffd700"; ctx.fillRect(-62, 6, 132, 5);
+  ctx.fillStyle = "#5c3317"; ctx.beginPath(); ctx.ellipse(-38, -28, 22, 26, 0, 0, 6.3); ctx.fill();   // sacul
+  ctx.fillStyle = "#c1121f"; ctx.beginPath(); ctx.ellipse(8, -22, 20, 22, 0, 0, 6.3); ctx.fill();     // Moșul
+  ctx.fillStyle = "#ffcdb2"; ctx.beginPath(); ctx.arc(12, -50, 14, 0, 6.3); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.ellipse(18, -42, 12, 9, 0.3, 0, 6.3); ctx.fill();
+  ctx.fillStyle = "#c1121f"; ctx.beginPath(); ctx.moveTo(-2, -56); ctx.quadraticCurveTo(-20, -84, -34, -58 + Math.sin(timp * 30) * 4); ctx.lineTo(24, -60); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.fillRect(-3, -62, 28, 7); ctx.beginPath(); ctx.arc(-34, -58 + Math.sin(timp * 30) * 4, 6, 0, 6.3); ctx.fill();
+  ctx.fillStyle = "#111"; ctx.fillRect(14, -56, 14, 6);                           // ochelarii de pilot
+  ctx.restore();
+}
+function pozitieSanie(t) {                                                         // traiectoria saniei (cu un looping)
+  const p = (t - 0.3) / 4.8;
+  const x = -150 * U + p * (W + 350 * U);
+  let y = H * 0.36 + Math.sin(p * Math.PI * 3) * 90 * U, unghi = Math.cos(p * Math.PI * 3) * 0.35;
+  return { x, y, unghi, p };
+}
+function renderScena2(dt, timp) {
+  const t = tScena, ySol = H * 0.76, disco = t > T_DISCO;
+  const nrBataie = disco ? Math.floor((t - T_DISCO) / PAS_BATAIE) : -1;
+  const fazaBataie = disco ? ((t - T_DISCO) / PAS_BATAIE) % 1 : 1;                // 0 = exact pe bătaie
+  const puls = disco ? Math.pow(1 - fazaBataie, 3) : 0;
+
+  if (nrBataie > s2Stare.bataie) {                                                // se execută o dată pe fiecare bătaie
+    s2Stare.bataie = nrBataie;
+    const noteBas = [65.4, 65.4, 77.8, 87.3], mel = [523, 659, 784, 659, 587, 698, 880, 784];
+    sunetTon("sine", 140, 40, 0.16, 0.75, 0);                                     // toba mare
+    sunetTon("sawtooth", noteBas[nrBataie % 4], noteBas[nrBataie % 4], 0.22, 0.25, 0.05);
+    sunetTon("triangle", mel[nrBataie % 8], mel[nrBataie % 8], 0.2, 0.16, 0);
+    sunetZgomot(0.06, "highpass", 6000, [[0, 0.18], [0.06, 0.001]], PAS_BATAIE / 2 / CONFIG.viteza);
+    zguduire = 0.25;
+    if (nrBataie % 4 === 0) { confetti(W * 0.12, ySol, 50); confetti(W * 0.88, ySol, 50); }
+  }
+  if (t > 2.6 && !s2Stare.boing) { s2Stare.boing = true; sunetTon("sine", 160, 620, 0.25, 0.6, 0); sunetTon("sine", 620, 220, 0.3, 0.5, 0.25); s2Stare.unda = t; strafulgerare = 0.35; culStrafulgerare = "120,220,255"; }
+  while (s2Stare.cadouriDate < 14 && t > 2.7 + s2Stare.cadouriDate * 0.12) {       // cadourile țâșnesc din brad
+    const i = s2Stare.cadouriDate++;
+    sunetTon("triangle", 350, 80, 0.09, 0.4, 0);
+    cadouri.push({ x: W * 0.52, y: ySol - 200 * U, vx: (Math.random() - 0.5) * 800 * U, vy: (-Math.random() * 600 - 350) * U,
+                   col: ["#ff2a54", "#00d4ff", "#ffd700", "#00ff88", "#d633ff"][i % 5], rot: Math.random() * 6, m: (13 + Math.random() * 8) * U });
+  }
+
+  ctx.save();
+  const zg = zguduire * 10 * U;
+  ctx.translate((Math.random() - 0.5) * zg, (Math.random() - 0.5) * zg);
+  deseneazaCer("#030617", disco ? "#1a0b3a" : "#0b1a3d", timp);
+  deseneazaAurora(timp, disco ? 1.6 : 0.8);
+  deseneazaPadure(ySol, "#0a1730", "#060d1e", disco ? timp * 7 : timp);
+
+  if (disco) {                                                                    // reflectoare colorate din cer
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    const cul = ["255,0,127", "0,245,212", "254,228,64", "155,93,229"];
+    for (let i = 0; i < 6; i++) {
+      const ox = W * (0.1 + i * 0.16), un = Math.PI / 2 + Math.sin(t * 2.2 + i * 1.7) * 0.6;
+      const lung = H * 1.1, lat = 0.13;
+      const g = ctx.createLinearGradient(ox, 0, ox + Math.cos(un) * lung, Math.sin(un) * lung);
+      g.addColorStop(0, `rgba(${cul[i % 4]},${0.30 + puls * 0.3})`); g.addColorStop(1, `rgba(${cul[i % 4]},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.moveTo(ox, -10); ctx.lineTo(ox + Math.cos(un - lat) * lung, Math.sin(un - lat) * lung); ctx.lineTo(ox + Math.cos(un + lat) * lung, Math.sin(un + lat) * lung); ctx.fill();
+    }
+    for (let i = 0; i < 8; i++) {                                                 // laserele de pe sol
+      const ang = Math.sin(t * 2.5 + i) * 0.7 - Math.PI / 2, sx = (W / 9) * (i + 1);
+      ctx.strokeStyle = `rgb(${cul[i % 4]})`; ctx.lineWidth = 3 * U; ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.moveTo(sx, ySol); ctx.lineTo(sx + Math.cos(ang) * H * 1.2, ySol + Math.sin(ang) * H * 1.2); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  deseneazaSol(ySol, disco ? `rgb(${216 + puls * 39},${236 - puls * 60},255)` : "#d8ecff", "#8fb0d8");
+
+  if (s2Stare.unda >= 0 && t - s2Stare.unda < 0.9) {                              // unda de șoc
+    const k = (t - s2Stare.unda) / 0.9;
+    ctx.strokeStyle = `rgba(150,230,255,${1 - k})`; ctx.lineWidth = 10 * U * (1 - k);
+    ctx.beginPath(); ctx.ellipse(W * 0.5, H * 0.4, W * 0.6 * k, H * 0.5 * k, 0, 0, 6.3); ctx.stroke();
+  }
+
+  // bradul: dansează pe ritm, cu globuri care clipesc
+  const dans = disco ? Math.sin((t - T_DISCO) / PAS_BATAIE * Math.PI) * 14 * U : 0;
+  ctx.save();
+  ctx.translate(W * 0.52 + dans, ySol + 4 * U);
+  ctx.scale(U * 1.25 * (1 + puls * 0.10), U * 1.25 * (1 - puls * 0.08));
+  ctx.rotate(disco ? Math.sin((t - T_DISCO) / PAS_BATAIE * Math.PI) * 0.06 : 0);
+  ctx.fillStyle = "#4a2511"; ctx.fillRect(-14, -36, 28, 36);
+  for (let e = 0; e < 4; e++) {
+    const g = ctx.createLinearGradient(-90, 0, 90, 0);
+    g.addColorStop(0, "#064d1c"); g.addColorStop(0.5, "#12913a"); g.addColorStop(1, "#064d1c");
+    ctx.fillStyle = g;
+    const yb = -36 - e * 48, lat = 96 - e * 20;
+    ctx.beginPath(); ctx.moveTo(0, yb - 90); ctx.lineTo(-lat, yb); ctx.lineTo(lat, yb); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.9)";
+    ctx.beginPath(); ctx.moveTo(0, yb - 90); ctx.lineTo(-lat * 0.3, yb - 62); ctx.lineTo(lat * 0.3, yb - 62); ctx.fill();
+  }
+  ctx.globalCompositeOperation = "lighter";
+  const culGlob = ["#ff2a54", "#00d4ff", "#ffd700", "#00ff88", "#d633ff"];
+  for (let i = 0; i < 22; i++) {
+    const k = i / 22, gy = -50 - k * 190, gx = Math.sin(i * 2.4) * (88 - k * 80);
+    ctx.globalAlpha = disco ? ((i + nrBataie) % 2 ? 1 : 0.25) : 0.55 + 0.45 * Math.sin(timp * 3 + i);
+    ctx.fillStyle = culGlob[i % 5]; ctx.shadowColor = culGlob[i % 5]; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.arc(gx, gy, 6, 0, 6.3); ctx.fill();
+  }
+  ctx.globalAlpha = 1; ctx.fillStyle = "#fff3a0"; ctx.shadowColor = "#ffd700"; ctx.shadowBlur = 30;
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) { const r = (i % 2 ? 8 : 20) * (1 + puls * 0.4), a = i * Math.PI / 5 - Math.PI / 2 + timp; ctx.lineTo(Math.cos(a) * r, -278 + Math.sin(a) * r); }
+  ctx.fill();
+  ctx.restore();
+
+  // omul de zăpadă: sare când trece sania, apoi dansează; pălăria îi zboară
+  let omY = 0, palY = 0, palRot = 0, omRot = 0;
+  if (t > 2.6 && t < 5.0) { const p = t - 2.6; omY = Math.abs(Math.sin(p * 8)) * 55; palY = Math.sin(Math.min(1, p / 2.2) * Math.PI) * 170; palRot = p * 7; }
+  if (disco) { omY += puls * 26; omRot = Math.sin((t - T_DISCO) / PAS_BATAIE * Math.PI) * 0.16; }
+  ctx.save();
+  ctx.translate(W * 0.22, ySol + 6 * U - omY * U); ctx.scale(U * 1.2, U * 1.2); ctx.rotate(omRot);
+  ctx.fillStyle = "rgba(0,0,40,.15)"; ctx.beginPath(); ctx.ellipse(0, 2 + omY, 44, 8, 0, 0, 6.3); ctx.fill();
+  for (const [cy, r] of [[-35, 38], [-90, 27], [-132, 20]]) {
+    const g = ctx.createRadialGradient(-r * 0.3, cy - r * 0.3, r * 0.1, 0, cy, r);
+    g.addColorStop(0, "#fff"); g.addColorStop(1, "#b9d2ee");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, cy, r, 0, 6.3); ctx.fill();
+  }
+  ctx.strokeStyle = "#5a3a1a"; ctx.lineWidth = 4; ctx.lineCap = "round";          // brațele din crenguțe
+  const br = disco ? Math.sin((t - T_DISCO) / PAS_BATAIE * Math.PI * 2) * 0.5 - 0.6 : (omY > 5 ? -0.9 : 0.2);
+  ctx.beginPath(); ctx.moveTo(-24, -95); ctx.lineTo(-24 - Math.cos(br) * 40, -95 + Math.sin(br) * 40); ctx.moveTo(24, -95); ctx.lineTo(24 + Math.cos(br) * 40, -95 + Math.sin(br) * 40); ctx.stroke();
+  ctx.strokeStyle = "#d90429"; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(0, -108, 22, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+  ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(-7, -136, 3, 0, 6.3); ctx.arc(7, -136, 3, 0, 6.3); ctx.arc(0, -96, 3, 0, 6.3); ctx.arc(0, -80, 3, 0, 6.3); ctx.fill();
+  ctx.fillStyle = "#ff6600"; ctx.beginPath(); ctx.moveTo(0, -131); ctx.lineTo(22, -127); ctx.lineTo(0, -123); ctx.fill();
+  ctx.save(); ctx.translate(0, -152 - palY); ctx.rotate(palRot);
+  ctx.fillStyle = "#111"; ctx.fillRect(-24, 0, 48, 6); ctx.fillRect(-15, -24, 30, 24); ctx.fillStyle = "#d90429"; ctx.fillRect(-15, -7, 30, 6);
+  ctx.restore(); ctx.restore();
+
+  // cadourile (fizică în funcție de timp, nu de numărul de cadre)
+  for (const c of cadouri) {
+    c.vy += 1500 * U * dt; c.x += c.vx * dt; c.y += c.vy * dt; c.rot += c.vx * 0.004 * dt * 60 / U * 0.05 + 3 * dt * Math.sign(c.vx || 1) * (Math.abs(c.vy) > 20 ? 1 : 0);
+    if (c.y > ySol - c.m) { c.y = ySol - c.m; if (Math.abs(c.vy) > 120 * U) { c.vy *= -0.45; } else { c.vy = 0; } c.vx *= 0.8; }
+    if (disco && c.vy === 0 && fazaBataie < 0.08) c.vy = -260 * U;                // sar și ele pe ritm
+    ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.rot);
+    ctx.fillStyle = c.col; ctx.fillRect(-c.m, -c.m, c.m * 2, c.m * 2);
+    ctx.fillStyle = "#fff"; ctx.fillRect(-c.m, -c.m * 0.2, c.m * 2, c.m * 0.4); ctx.fillRect(-c.m * 0.2, -c.m, c.m * 0.4, c.m * 2);
+    ctx.restore();
+  }
+
+  // sania: prima trecere în prim-plan, apoi treceri mici în fundal
+  if (t > 0.3 && t < 5.5) {
+    const s = pozitieSanie(t);
+    for (let i = 0; i < 5; i++) {                                                 // dâra de nitro
+      const cul = Math.random() < 0.6 ? "#00d4ff" : (Math.random() < 0.5 ? "#ffffff" : "#ff8c00");
+      particula(s.x - 80 * U, s.y + 8 * U, (-300 - Math.random() * 300) * U, (Math.random() - 0.5) * 120 * U, 0.5 + Math.random() * 0.7, cul, (2 + Math.random() * 3) * U, 30 * U, 1);
+    }
+    ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 2 * U;            // linii de viteză
+    for (let i = 0; i < 6; i++) { const ly = s.y + (Math.random() - 0.5) * 120 * U, lx = s.x - (120 + Math.random() * 300) * U; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx - (60 + Math.random() * 140) * U, ly); ctx.stroke(); }
+    deseneazaSanie(s.x, s.y, U * 1.25, -s.unghi * 0.6, timp);
+  } else if (t > 6.5) {
+    const k = ((t - 6.5) % 5) / 5, dir = Math.floor((t - 6.5) / 5) % 2 ? -1 : 1;
+    const x = dir > 0 ? -100 * U + k * (W + 200 * U) : W + 100 * U - k * (W + 200 * U), y = H * 0.2 + Math.sin(k * 9) * 30 * U;
+    particula(x - dir * 40 * U, y, -dir * 200 * U, 0, 0.6, "#00d4ff", 2 * U, 0, 1);
+    ctx.save(); ctx.translate(x, y); ctx.scale(dir, 1); deseneazaSanie(0, 0, U * 0.5, 0, timp); ctx.restore();
+  }
+
+  deseneazaParticule(dt);
+  deseneazaZapada(dt, timp, 40, 1.2);
+
+  if (disco) {                                                                    // glob disco + titlu care pulsează
+    const gx = W * 0.5, gy = H * 0.07 + 30 * U, gr = 30 * U;
+    ctx.strokeStyle = "#888"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, gy - gr); ctx.stroke();
+    const g = ctx.createRadialGradient(gx - gr * 0.3, gy - gr * 0.3, 2, gx, gy, gr);
+    g.addColorStop(0, "#fff"); g.addColorStop(1, "#667");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(gx, gy, gr, 0, 6.3); ctx.fill();
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 14; i++) {
+      const a = t * 1.5 + i * 0.449, d = (60 + ((i * 97) % 300)) * U * 2;
+      ctx.fillStyle = `hsla(${(i * 47 + t * 80) % 360},100%,70%,.8)`;
+      ctx.beginPath(); ctx.arc(gx + Math.cos(a) * d, gy + Math.abs(Math.sin(a)) * d * 0.7, 5 * U, 0, 6.3); ctx.fill();
+    }
+    ctx.restore();
+    const k = t - T_DISCO - 0.1;
+    text(CONFIG.titluNitro, W / 2, H * 0.27, 64 * U, "#ffd700", "#ff8c00", aparitie(k / 0.35) * (1 + puls * 0.08));
+    text(CONFIG.subtitluNitro, W / 2, H * 0.36, 36 * U, "#00f5d4", "#00d4ff", aparitie((k - 0.25) / 0.35) * (1 + puls * 0.05));
+  }
+  ctx.restore();
+  efecteEcran(dt);
+}
+
+/* =====================================================================
+   SCENA 3 – ARTIFICII INTERACTIVE DE REVELION
+   ===================================================================== */
+let rachete = [], s3Stare = {};
+const cladiri = Array.from({ length: 26 }, (_, i) => ({ x: i / 26, l: 1 / 26 + 0.004, h: 0.05 + Math.random() * 0.13, f: Array.from({ length: 24 }, () => Math.random() < 0.45) }));
+
+function lanseazaArtificiu(tx, ty, tip) {
+  const nuanta = Math.random() * 360;
+  rachete.push({ x: tx + (Math.random() - 0.5) * 140 * U, y: H * 0.86, tx, ty, nuanta, tip: tip === undefined ? Math.floor(Math.random() * 5) : tip });
+  sunetTon("sine", 420, 1250, 0.35, 0.12, 0);
+  sunetZgomot(0.35, "bandpass", 3000, [[0, 0.05], [0.35, 0.001]]);
+}
+function explodeazaArtificiu(r) {
+  const { tx: x, ty: y, nuanta, tip } = r;
+  sunetTon("sine", 115, 28, 0.45, 0.7, 0);
+  sunetZgomot(0.7, "lowpass", 1800, [[0, 0.5], [0.7, 0.001]]);
+  for (let i = 0; i < 10; i++) sunetZgomot(0.04, "highpass", 5000, [[0, 0.1], [0.04, 0.001]], 0.25 + Math.random() * 0.9);   // pocnituri
+  const c1 = `hsl(${nuanta},100%,62%)`, c2 = `hsl(${(nuanta + 150) % 360},100%,65%)`;
+  const n = 150;
+  for (let i = 0; i < n; i++) {
+    const ang = (i / n) * Math.PI * 2 + Math.random() * 0.1;
+    let v = (140 + Math.random() * 300) * U, cul = c1, viata = 1.3 + Math.random() * 0.9, grav = 90 * U, pt = 0, vx, vy;
+    if (tip === 1) v = 380 * U * (0.95 + Math.random() * 0.1);                                  // inel
+    if (tip === 2 && i % 2) { v *= 0.5; cul = c2; }                                             // dublu, două culori
+    if (tip === 3) { viata = 2.4 + Math.random(); grav = 190 * U; cul = "#ffd27a"; pt = 1; }    // salcie aurie
+    if (tip === 4) { pt = 1; cul = i % 3 ? c1 : "#ffffff"; }                                    // sclipitor
+    vx = Math.cos(ang) * v; vy = Math.sin(ang) * v;
+    if (tip === 1) vy *= 0.45;                                                                  // inelul e văzut înclinat
+    particula(x, y, vx, vy, viata, cul, 3.2 * U, grav, pt);
+  }
+  s3Stare.lumina = 1; s3Stare.culLumina = nuanta; s3Stare.xLumina = x;
+  strafulgerare = 0.12; culStrafulgerare = "255,255,255";
+}
+function salva(n) { for (let i = 0; i < n; i++) planifica(() => { if (scenaCurenta === 3) lanseazaArtificiu(W * (0.1 + 0.8 * (i + 0.5) / n), H * (0.14 + Math.random() * 0.25)); }, i * 140); }
+
+function startScena3() {
+  tScena = 0; rachete = []; particule = []; s3Stare = { lumina: 0, culLumina: 0, xLumina: 0, urmSalva: 9 };
+  hintEl.textContent = CONFIG.subtitluRevelion;
+  lanseazaArtificiu(W * 0.5, H * 0.3, 2);
+  const buclaAuto = () => {
+    if (scenaCurenta !== 3) return;
+    lanseazaArtificiu(W * (0.12 + Math.random() * 0.76), H * (0.12 + Math.random() * 0.38));
+    planifica(buclaAuto, (700 + Math.random() * 900) / CONFIG.viteza);
+  };
+  planifica(buclaAuto, 900 / CONFIG.viteza);
+}
+canvas.addEventListener("pointerdown", e => { if (scenaCurenta === 3) lanseazaArtificiu(e.clientX, Math.min(e.clientY, H * 0.6)); });
+canvas.addEventListener("dblclick", () => { if (scenaCurenta === 3) salva(9); });
+
+function renderScena3(dt, timp) {
+  const t = tScena, ySol = H * 0.8;
+  if (t > s3Stare.urmSalva) { s3Stare.urmSalva = t + 12; salva(9); }               // la fiecare 12 s, o salvă mare
+
+  deseneazaCer("#02030c", "#0a1230", timp, false);
+  s3Stare.lumina = Math.max(0, s3Stare.lumina - dt * 1.2);
+  if (s3Stare.lumina > 0) {                                                       // cerul se luminează la explozie
+    const g = ctx.createRadialGradient(s3Stare.xLumina, H * 0.3, 0, s3Stare.xLumina, H * 0.3, H * 0.9);
+    g.addColorStop(0, `hsla(${s3Stare.culLumina},100%,60%,${0.28 * s3Stare.lumina})`); g.addColorStop(1, "hsla(0,0%,0%,0)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  }
+  for (const c of cladiri) {                                                      // orașul cu ferestre aprinse
+    const cx = c.x * W, cl = c.l * W, ch = c.h * H;
+    ctx.fillStyle = "#060914"; ctx.fillRect(cx, ySol - ch, cl, ch + 2);
+    ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.fillRect(cx, ySol - ch - 3 * U, cl, 4 * U);     // zăpadă pe acoperiș
+    ctx.fillStyle = "rgba(255,214,120,.8)";
+    c.f.forEach((aprins, k) => { if (aprins) { const fx = cx + (k % 4 + 0.5) * cl / 4.5, fy = ySol - ch + (Math.floor(k / 4) + 0.6) * 16 * U; if (fy < ySol - 8 * U) ctx.fillRect(fx, fy, 4 * U, 6 * U); } });
+  }
+  deseneazaSol(ySol, s3Stare.lumina > 0 ? `hsl(${s3Stare.culLumina},${50 * s3Stare.lumina}%,${78 + 10 * s3Stare.lumina}%)` : "#c9dcf2", "#6f8fb8");
+
+  for (let i = rachete.length - 1; i >= 0; i--) {                                 // rachetele urcă lăsând dâră
+    const r = rachete[i];
+    const dx = r.tx - r.x, dy = r.ty - r.y, d = Math.hypot(dx, dy), pas = 850 * U * CONFIG.viteza * dt;
+    if (d <= pas) { explodeazaArtificiu(r); rachete.splice(i, 1); continue; }
+    r.x += dx / d * pas; r.y += dy / d * pas;
+    particula(r.x, r.y, (Math.random() - 0.5) * 40 * U, 60 * U, 0.45, "#ffd9a0", 2 * U, 60 * U, 1);
+    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(r.x, r.y, 3 * U, 0, 6.3); ctx.fill();
+  }
+  deseneazaParticule(dt);
+  deseneazaZapada(dt, timp, 15, 0.8);
+  text(CONFIG.mesajRevelion, W / 2, H * 0.9, 62 * U, "#ffd700", "#ff8c00", aparitie(t / 0.6) * (1 + s3Stare.lumina * 0.05));
+  efecteEcran(dt);
+}
+
+/* =====================================================================
+   PORNIRE, SCHIMBARE DE SCENĂ, BUCLA PRINCIPALĂ
+   ===================================================================== */
+let scenaCurenta = 0;
+function pornesteAplicatia(nr) {
+  try { initAudio(); } catch (e) { /* fără sunet, animația merge oricum */ }
+  el("startOverlay").style.display = "none";
+  el("meniu").style.display = "flex";
+  schimbaScena(nr);
+}
+function schimbaScena(nr) {
+  try { initAudio(); } catch (e) {}
+  stopToateSunetele();
+  scenaCurenta = nr; zguduire = 0; strafulgerare = 0; culStrafulgerare = "255,255,255";
+  [1, 2, 3].forEach(i => el("b" + i).classList.toggle("activ", i === nr));
+  if (nr === 1) startScena1();
+  if (nr === 2) startScena2();
+  if (nr === 3) startScena3();
+}
+let ultimulCadru = 0;
+function loop(acum) {
+  const dtReal = Math.min(0.05, (acum - ultimulCadru) / 1000 || 0.016);          // secunde de la cadrul anterior
+  ultimulCadru = acum;
+  const dt = dtReal * CONFIG.viteza;                                             // „Viteză animație” din Setări
+  tScena += dt;
+  const timp = acum / 1000;
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over"; ctx.shadowBlur = 0;
+  if (scenaCurenta === 1) renderScena1(dt, timp);
+  else if (scenaCurenta === 2) renderScena2(dt, timp);
+  else if (scenaCurenta === 3) renderScena3(dt, timp);
+  requestAnimationFrame(loop);
+}
+resize();
+sincronizeazaFulgi();
+requestAnimationFrame(loop);
+</script>
+
+
+</body></html>

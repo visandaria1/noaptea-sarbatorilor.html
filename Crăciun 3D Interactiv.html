@@ -1,0 +1,524 @@
+
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crăciun 3D Interactiv</title>
+<style>
+*{box-sizing:border-box}
+html,body{
+height:100%;margin:0;overflow:hidden;
+background:radial-gradient(circle at 50% 60%,#0d2244,#02050d 75%);
+font-family:'Segoe UI',sans-serif;
+touch-action:none;
+}
+canvas{display:block;cursor:grab}
+canvas:active{cursor:grabbing}
+#mesaj{
+position:fixed;bottom:28px;width:100%;
+text-align:center;color:white;pointer-events:none;
+}
+#titlu{
+font-size:clamp(24px,5vw,46px);
+font-weight:bold;letter-spacing:3px;margin:0;
+text-shadow:0 0 15px #ffd700,0 0 30px #ff8c00;
+animation:puls 2.4s infinite;
+}
+#subtitlu{
+font-size:clamp(14px,2.4vw,20px);
+color:#a8d8ff;margin-top:8px;
+text-shadow:0 0 10px #00aaff;
+}
+@keyframes puls{
+50%{text-shadow:0 0 25px #ffd700,0 0 55px #ff8c00,0 0 80px #ff3366}
+}
+#bara{position:fixed;top:12px;right:12px}
+button{
+background:rgba(10,25,50,.8);color:white;
+border:1px solid #ffffff55;padding:10px 16px;
+border-radius:22px;font-weight:bold;cursor:pointer;
+}
+button.activ{background:linear-gradient(135deg,#e63946,#ff8c00)}
+#ajutor{
+position:fixed;top:16px;left:14px;
+color:#ffffffaa;font-size:12px;pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="ajutor">
+Trage cu degetul sau mouse-ul pentru a roti bradul · Click pentru explozie de sclipici
+</div>
+
+<div id="bara">
+<button id="btnSunet">🔔 Sunet</button>
+</div>
+
+<div id="mesaj">
+<h1 id="titlu">SĂRBĂTORI FERICITE!</h1>
+<div id="subtitlu">Magia Crăciunului 2027 ✨</div>
+</div>
+
+<script>
+const CONFIG={
+titlu:"SĂRBĂTORI FERICITE!",
+subtitlu:"Magia Crăciunului 2027 ✨",
+numarParticuleBrad:1800,
+numarGhirlanda:320,
+numarFulgi:600,
+vitezaRotatie:0.25,
+culoriBrad:["#00ff9d","#00c878","#008f63","#baffd9"],
+culoriGhirlanda:["#ffd700","#ff1744","#ffffff","#ffae00","#ff69b4"]
+};
+
+document.getElementById("titlu").textContent=CONFIG.titlu;
+document.getElementById("subtitlu").textContent=CONFIG.subtitlu;
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+let w,h,scaraScena;
+
+function resize(){
+w=canvas.width=innerWidth;
+h=canvas.height=innerHeight;
+scaraScena=Math.min(w/700,h/760);
+}
+addEventListener("resize",resize);
+resize();
+
+const pete={};
+
+function pata(culoare){
+if(pete[culoare])return pete[culoare];
+
+const c=document.createElement("canvas");
+c.width=c.height=64;
+
+const g=c.getContext("2d");
+const grad=g.createRadialGradient(32,32,0,32,32,32);
+
+grad.addColorStop(0,"#ffffff");
+grad.addColorStop(.18,culoare);
+grad.addColorStop(.5,culoare+"55");
+grad.addColorStop(1,culoare+"00");
+
+g.fillStyle=grad;
+g.fillRect(0,0,64,64);
+
+return pete[culoare]=c;
+}
+
+const INALTIME=460,RAZA_BAZA=200,Y_VARF=-250;
+const puncte=[];
+
+for(let i=0;i<CONFIG.numarParticuleBrad;i++){
+const t=Math.pow(Math.random(),.7);
+const etaj=(t*6)%1;
+const raza=t*RAZA_BAZA*(.55+.45*etaj)*(.35+.65*Math.sqrt(Math.random()));
+
+puncte.push({
+unghi:Math.random()*Math.PI*2,
+raza,
+y:Y_VARF+t*INALTIME,
+culoare:CONFIG.culoriBrad[i%CONFIG.culoriBrad.length],
+marime:Math.random()*2.2+1.2,
+faza:Math.random()*Math.PI*2,
+tip:0
+});
+}
+
+for(let i=0;i<CONFIG.numarGhirlanda;i++){
+const t=i/CONFIG.numarGhirlanda;
+const sens=i%2?1:-1;
+
+puncte.push({
+unghi:sens*t*Math.PI*14,
+raza:t*RAZA_BAZA*1.04+4,
+y:Y_VARF+t*INALTIME,
+culoare:CONFIG.culoriGhirlanda[i%CONFIG.culoriGhirlanda.length],
+marime:4.2,
+faza:i*.35,
+tip:1
+});
+}
+
+for(let i=0;i<500;i++){
+const r=Math.sqrt(Math.random())*330;
+
+puncte.push({
+unghi:Math.random()*Math.PI*2,
+raza:r,
+y:Y_VARF+INALTIME+28+Math.random()*6,
+culoare:"#bfe0ff",
+marime:1.6+Math.random()*1.6,
+faza:Math.random()*6.28,
+tip:2
+});
+}
+
+const fulgi=[];
+
+for(let i=0;i<CONFIG.numarFulgi;i++){
+fulgi.push({
+x:(Math.random()-.5)*1400,
+y:Math.random()*900-450,
+z:(Math.random()-.5)*1400,
+v:40+Math.random()*60,
+faza:Math.random()*6.28
+});
+}
+
+const scantei=[];
+
+function explozie(x,y,z,culoare,n){
+for(let i=0;i<n;i++){
+const u=Math.random()*2-1;
+const a=Math.random()*Math.PI*2;
+const s=Math.sqrt(1-u*u);
+const v=60+Math.random()*260;
+
+scantei.push({
+x,y,z,
+vx:s*Math.cos(a)*v,
+vy:u*v,
+vz:s*Math.sin(a)*v,
+viata:1,
+culoare:culoare||CONFIG.culoriGhirlanda[i%CONFIG.culoriGhirlanda.length]
+});
+}
+}
+
+let cometa=null;
+let urmatoareaCometa=3;
+
+let rotY=0,rotX=.18,vitY=0;
+let tras=false,ultimX=0,ultimY=0,miscat=0;
+
+canvas.addEventListener("pointerdown",e=>{
+tras=true;
+miscat=0;
+ultimX=e.clientX;
+ultimY=e.clientY;
+canvas.setPointerCapture(e.pointerId);
+});
+
+canvas.addEventListener("pointermove",e=>{
+if(!tras)return;
+
+const dx=e.clientX-ultimX;
+const dy=e.clientY-ultimY;
+
+miscat+=Math.abs(dx)+Math.abs(dy);
+vitY=dx*.5;
+rotY+=dx*.008;
+rotX=Math.max(-.25,Math.min(.75,rotX+dy*.005));
+
+ultimX=e.clientX;
+ultimY=e.clientY;
+});
+
+canvas.addEventListener("pointerup",()=>{
+tras=false;
+if(miscat<6){
+explozie(0,Y_VARF+Math.random()*300,0,null,160);
+clinchet();
+}
+});
+
+let ac=null,volum=null,sunetPornit=false;
+let urmatoareaNota=0,indexNota=0;
+
+const DO=523.25,RE=587.33,MI=659.25;
+const SOL=783.99,LA=880,DO2=1046.5;
+
+const MELODIE=[
+[MI,1],[SOL,1],[DO2,2],[LA,1],[SOL,1],[MI,2],
+[RE,1],[MI,1],[SOL,1],[MI,1],[RE,2],[0,2],
+[MI,1],[SOL,1],[DO2,2],[LA,1],[DO2,1],[SOL,2],
+[MI,1],[RE,1],[DO,1],[RE,1],[DO,2],[0,2]
+];
+
+function clopotel(f,t,vol){
+for(const [m,a] of [[1,vol],[2.76,vol*.3],[5.4,vol*.12]]){
+const o=ac.createOscillator();
+const g=ac.createGain();
+
+o.frequency.value=f*m;
+g.gain.setValueAtTime(.0001,t);
+g.gain.exponentialRampToValueAtTime(a,t+.01);
+g.gain.exponentialRampToValueAtTime(.0001,t+1.2/Math.sqrt(m));
+
+o.connect(g).connect(volum);
+o.start(t);
+o.stop(t+1.3);
+}
+}
+
+function clinchet(){
+if(ac&&sunetPornit)
+[1568,2093,2637].forEach((f,i)=>
+clopotel(f,ac.currentTime+i*.06,.07)
+);
+}
+
+function muzica(){
+if(!ac||!sunetPornit)return;
+
+if(urmatoareaNota<ac.currentTime)
+urmatoareaNota=ac.currentTime+.1;
+
+while(urmatoareaNota<ac.currentTime+.4){
+const [f,d]=MELODIE[indexNota];
+
+if(f)clopotel(f,urmatoareaNota,.13);
+
+urmatoareaNota+=d*.3;
+indexNota=(indexNota+1)%MELODIE.length;
+}
+}
+
+document.getElementById("btnSunet").addEventListener("click",async e=>{
+if(!ac){
+ac=new(window.AudioContext||window.webkitAudioContext)();
+volum=ac.createGain();
+volum.gain.value=.8;
+volum.connect(ac.destination);
+}
+
+if(ac.state==="suspended")await ac.resume();
+
+sunetPornit=!sunetPornit;
+e.currentTarget.classList.toggle("activ",sunetPornit);
+e.currentTarget.textContent=sunetPornit?"🔔 Sunet pornit":"🔔 Sunet";
+});
+
+const FOCALA=620,DISTANTA=760;
+
+let cosY,sinY,cosX,sinX;
+
+function proiecteaza(x,y,z){
+const x1=x*cosY-z*sinY;
+const z1=x*sinY+z*cosY;
+const y2=y*cosX-z1*sinX;
+const z2=y*sinX+z1*cosX;
+
+const s=FOCALA/(FOCALA+z2+DISTANTA-FOCALA);
+
+return{
+x:w/2+x1*s*scaraScena,
+y:h/2-10+y2*s*scaraScena,
+s:s*scaraScena,
+z:z2
+};
+}
+
+function deseneazaStea(cx,cy,raza,timp){
+ctx.save();
+ctx.translate(cx,cy);
+ctx.globalCompositeOperation="lighter";
+
+for(let i=0;i<4;i++){
+ctx.rotate(Math.PI/4+(i===0?timp*.4:0));
+
+const lung=raza*(3.2+Math.sin(timp*3+i)*.8);
+const g=ctx.createLinearGradient(-lung,0,lung,0);
+
+g.addColorStop(0,"rgba(255,215,0,0)");
+g.addColorStop(.5,"rgba(255,245,180,.9)");
+g.addColorStop(1,"rgba(255,215,0,0)");
+
+ctx.fillStyle=g;
+ctx.fillRect(-lung,-raza*.07,lung*2,raza*.14);
+}
+
+ctx.drawImage(pata("#ffd700"),-raza*2.6,-raza*2.6,raza*5.2,raza*5.2);
+ctx.restore();
+
+ctx.save();
+ctx.translate(cx,cy);
+ctx.rotate(Math.sin(timp*1.5)*.12);
+ctx.beginPath();
+
+for(let i=0;i<10;i++){
+const r=i%2?raza*.42:raza;
+const a=i*Math.PI/5-Math.PI/2;
+ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);
+}
+
+ctx.closePath();
+ctx.fillStyle="#fff5a0";
+ctx.fill();
+ctx.restore();
+}
+
+let ultimulTimp=0;
+const lista=[];
+
+function anima(acum){
+const timp=acum/1000;
+const dt=Math.min(.05,timp-ultimulTimp||.016);
+ultimulTimp=timp;
+
+if(!tras){
+rotY+=(CONFIG.vitezaRotatie+vitY)*dt;
+vitY*=Math.pow(.05,dt);
+}
+
+cosY=Math.cos(rotY);
+sinY=Math.sin(rotY);
+cosX=Math.cos(rotX);
+sinX=Math.sin(rotX);
+
+ctx.globalCompositeOperation="source-over";
+ctx.clearRect(0,0,w,h);
+lista.length=0;
+
+for(const f of fulgi){
+f.y+=f.v*dt;
+
+if(f.y>450){
+f.y=-450;
+f.x=(Math.random()-.5)*1400;
+}
+
+const x=f.x+Math.sin(timp*.8+f.faza)*25;
+const z=f.z;
+const s=FOCALA/(z+DISTANTA)*scaraScena;
+
+if(z+DISTANTA<80)continue;
+
+lista.push({
+x:w/2+x*s,
+y:h/2+f.y*s,
+r:2.6*s,
+z,
+c:"#ffffff",
+a:.75
+});
+}
+
+for(const p of puncte){
+const un=p.unghi+(p.tip===1?timp*.25*(p.unghi>0?1:-1):0);
+
+const pr=proiecteaza(
+Math.cos(un)*p.raza,
+p.y,
+Math.sin(un)*p.raza
+);
+
+let a=.6+.4*Math.sin(timp*3+p.faza);
+let r=p.marime;
+
+if(p.tip===1){
+a=.35+.65*Math.pow(Math.max(0,Math.sin(timp*2.2-p.faza)),2);
+r*=1+a;
+}
+
+if(p.tip===2)a=.25+.3*Math.sin(timp*2+p.faza);
+
+lista.push({
+x:pr.x,y:pr.y,
+r:r*pr.s*2.4,
+z:pr.z,c:p.culoare,a
+});
+}
+
+for(let i=scantei.length-1;i>=0;i--){
+const s=scantei[i];
+
+s.viata-=dt*.8;
+
+if(s.viata<=0){
+scantei.splice(i,1);
+continue;
+}
+
+s.vy+=160*dt;
+s.vx*=1-1.2*dt;
+s.vy*=1-1.2*dt;
+s.vz*=1-1.2*dt;
+
+s.x+=s.vx*dt;
+s.y+=s.vy*dt;
+s.z+=s.vz*dt;
+
+const pr=proiecteaza(s.x,s.y,s.z);
+
+lista.push({
+x:pr.x,y:pr.y,
+r:5*pr.s*s.viata+1,
+z:pr.z,c:s.culoare,a:s.viata
+});
+}
+
+urmatoareaCometa-=dt;
+
+if(urmatoareaCometa<=0&&!cometa){
+cometa={
+t:0,
+x0:(Math.random()<.5?-1:1)*700,
+y0:-620
+};
+urmatoareaCometa=7+Math.random()*5;
+}
+
+if(cometa){
+cometa.t+=dt*1.1;
+
+const k=Math.min(1,cometa.t);
+const cx=cometa.x0*(1-k);
+const cy=cometa.y0+(Y_VARF-20-cometa.y0)*k;
+
+for(let j=0;j<4;j++){
+scantei.push({
+x:cx,y:cy,z:0,
+vx:(Math.random()-.5)*50,
+vy:(Math.random()-.5)*50,
+vz:(Math.random()-.5)*50,
+viata:.8,
+culoare:"#ffe9a0"
+});
+}
+
+if(k>=1){
+explozie(0,Y_VARF-20,0,"#ffd700",220);
+clinchet();
+cometa=null;
+}
+}
+
+lista.sort((a,b)=>b.z-a.z);
+
+ctx.globalCompositeOperation="lighter";
+
+for(const p of lista){
+ctx.globalAlpha=Math.max(0,Math.min(1,p.a));
+const d=Math.max(1.5,p.r*2);
+
+ctx.drawImage(
+pata(p.c),
+p.x-d/2,
+p.y-d/2,
+d,d
+);
+}
+
+ctx.globalAlpha=1;
+
+const varf=proiecteaza(0,Y_VARF-22,0);
+deseneazaStea(varf.x,varf.y,22*varf.s,timp);
+
+muzica();
+requestAnimationFrame(anima);
+}
+
+requestAnimationFrame(anima);
+</script>
+
+</body>
+</html>
